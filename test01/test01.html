@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <head>
+        <SCRIPT>var isomorphicDir="isomorphic/";</SCRIPT>
+        <SCRIPT SRC=isomorphic/system/modules/ISC_Core.js></SCRIPT>
+        <SCRIPT SRC=isomorphic/system/modules/ISC_Foundation.js></SCRIPT>
+        <SCRIPT SRC=isomorphic/system/modules/ISC_Containers.js></SCRIPT>
+        <SCRIPT SRC=isomorphic/system/modules/ISC_Grids.js></SCRIPT>
+        <SCRIPT SRC=isomorphic/system/modules/ISC_Forms.js></SCRIPT>
+        <SCRIPT SRC=isomorphic/system/modules/ISC_DataBinding.js></SCRIPT>
+        <SCRIPT SRC=isomorphic/skins/EnterpriseBlue/load_skin.js></SCRIPT>
+
+        <SCRIPT SRC=isomorphic/system/development/ISC_FileLoader.js></SCRIPT>
+        
+        <!--<SCRIPT SRC=DataForm1.js></SCRIPT>-->
+
+                     </head>
+</head>
+<body>
+    <!--<canvas style='width:100%;height:100%' id='Lay3D' touch-action='none'></canvas>-->
+<script>
+formdene();
+
+function formdene()
+{
+
+    isc.ValuesManager.create({
+            ID:"F04003_TaskMaster_ValuesManager",
+        });
+
+//TaskMaster Form 
+var form = isc.DynamicForm.create({
+            ID: "F04003_TaskMasterEditForm",
+            autoDraw: true,
+            //width: "100%",
+            height: 300,
+            padding: 6,
+            numCols: 4,
+            colWidths: [140, 200, 140, 280],
+            //backgroundColor: Common.Color.formBackground,
+            fields: [
+                { name: "Id", title: "ID", disabled: true, colSpan: 1 },
+                { name: "project_id", title: "res.project_id", editorType: "text", disabled: true, colSpan: 1, wrapHintText: false },
+                {
+                    name: "task_name", title: "res.task_name", editorType: "text", required: true, colSpan: 1, width: 230,
+                },
+                {
+                    name: "task_type", title: "res.username", type: "select",
+                    //optionDataSource: lookupDS.getDp_TASKTYPE(), 
+                    valueField: "task_type", displayField: "aciklama",
+                    width:200,
+                },
+                /*
+                {
+                    name: "task_type", title: res.task_type, required: true, colSpan: 1, width: 250,
+                    editorType: "Select", valueMap: {
+                        "Axata_FirmMaster": "Axata_FirmMaster",
+                        "Axata_LogMail": "Axata_LogMail",
+                        "CevaSend_GoodsIssue": "CevaSend_GoodsIssue",
+                        "CevaSend_GoodReceipt": "CevaSend_GoodReceipt",
+                        "CevaSend_StockMovement": "CevaSend_StockMovement",
+                        "CevaSend_StockRepost": "CevaSend_StockRepost",
+                        "CustomTask": "CustomTask",
+                    }
+                },
+                */
+                {
+                    name: "task_desc", title: "res.task_desc", editorType: "TextArea", colSpan: 4, width: "100%", height: 50,
+                },
+                { name: "isActive", title: "res.statu", colSpan: 1, type: "checkbox" },
+                { name: "saveInfoDoc", title: "res.saveInfoDoc", colSpan: 1, type: "boolean" },
+                { name: "rowSpacer", type: "RowSpacer", colSpan: 4 , height:20,},
+                {
+                    name: "sch_type", title: "res.sch_type", required: true, colSpan: 2, width: 200,
+                    editorType: "Select", valueMap: {"Anlık" : "res.anlik", "Periyodik": "res.periyodik", "Günlük": "res.gunluk" }, value: "Periyodik",
+                    changed: function (form, item, value) {
+                        if (value == "Anlık") {
+                            form.getField("sch_period").setDisabled(true);
+                            form.getField("sch_attime").setDisabled(true);
+                            form.getField("sch_period_type").setDisabled(true);
+                        }else if (value == "Günlük") {
+                            form.getField("sch_period").setDisabled(true);
+                            form.getField("sch_attime").setDisabled(false);
+                            form.getField("sch_period_type").setDisabled(true);
+                        } else {
+                            form.getField("sch_period").setDisabled(false);
+                            form.getField("sch_attime").setDisabled(true);
+                            form.getField("sch_period_type").setDisabled(false);
+                        }
+                    }
+                },
+                { name: "sch_attime", title: "res.sch_attime", colSpan: 2, type: "time", useTextField: false, format: "HH:mm", disabled: true },
+                { name: "sch_period", title: "res.sch_period", colSpan: 2, editorType: "SpinnerItem", min: 1, value: 1, },
+                {
+                    name: "sch_period_type", title: "res.sch_period_type", colSpan: 1, width: 120,
+                    editorType: "Select", valueMap: { 1: "Dakika", 2: "Saat" }, value: 1, rowSpan: 2,
+                },
+                {
+                    name: "credate", title: "res.grd_credate", type: "datetime", disabled: true, //width: 200 , 
+                    //displayFormat: "dd.MM.yyyy HH:mm:ss",
+                    format: "dd.MM.yyyy HH:mm:ss",
+                    colSpan: 1
+                },
+            ]
+        })
+
+        isc.DynamicForm.create({
+            ID: "F04003_TaskConfig_ListSQL",
+            autoDraw: true,
+            width: "100%",
+            height: "100%",
+            valuesManager: F04003_TaskMaster_ValuesManager,
+            fields: [
+                { name: "Id", title: "ID", disabled: true, hidden: true },
+                { name: "sql_list", title: "res.sql_list", editorType: "TextArea", colSpan: 2, width: "100%", height: "100%", showTitle: false, browserSpellCheck:false},
+            ]
+        });
+
+        isc.DynamicForm.create({
+            ID: "F04003_TaskConfig_MasterSQL",
+            autoDraw: true,
+            width: "100%",
+            height: "100%",
+            valuesManager: F04003_TaskMaster_ValuesManager,
+            fields: [
+                { name: "Id", title: "ID", disabled: true, colSpan: 3, colNum: 1, hidden: true },
+                { name: "sql_master", title: "res.sql_master", editorType: "TextArea", colSpan: 2, width: "100%", height: "100%", showTitle: false, browserSpellCheck: false},
+            ]
+        });
+
+        isc.DynamicForm.create({
+            ID: "F04003_TaskConfig_DetailSQL",
+            autoDraw: true,
+            width: "100%",
+            height: "100%",
+            valuesManager: F04003_TaskMaster_ValuesManager,
+            fields: [
+                { name: "Id", title: "ID", disabled: true, colSpan: 3, colNum: 1, hidden: true },
+                { name: "sql_detail", title: "res.sql_detail", editorType: "TextArea", colSpan: 2, width: "100%", height: "100%", showTitle: false, browserSpellCheck: false },
+            ]
+        });
+
+        isc.DynamicForm.create({
+            ID: "F04003_TaskConfig_Prop1SQL",
+            autoDraw: true,
+            width: "100%",
+            height: "100%",
+            valuesManager: F04003_TaskMaster_ValuesManager,
+            fields: [
+                { name: "Id", title: "ID", disabled: true, colSpan: 3, colNum: 1, hidden: true },
+                { name: "sql_prop1", title: "res.sql_detail", editorType: "TextArea", colSpan: 2, width: "100%", height: "100%", showTitle: false, browserSpellCheck: false },
+            ]
+        });
+
+        isc.DynamicForm.create({
+            ID: "F04003_TaskConfig_Prop2SQL",
+            autoDraw: true,
+            width: "100%",
+            height: "100%",
+            valuesManager: F04003_TaskMaster_ValuesManager,
+            fields: [
+                { name: "Id", title: "ID", disabled: true, colSpan: 3, colNum: 1, hidden: true },
+                { name: "sql_prop2", title: "res.sql_detail", editorType: "TextArea", colSpan: 2, width: "100%", height: "100%", showTitle: false, browserSpellCheck: false },
+            ]
+        });
+
+        isc.DynamicForm.create({
+            ID: "F04003_TaskConfig_SuccessSQL",
+            autoDraw: true,
+            width: "100%",
+            height: "100%",
+            valuesManager: F04003_TaskMaster_ValuesManager,
+            fields: [
+                { name: "Id", title: "ID", disabled: true, colSpan: 3, colNum: 1, hidden: true },
+                { name: "sql_success", title: "res.sql_success", editorType: "TextArea", colSpan: 2, width: "100%", height: "100%", showTitle: false, browserSpellCheck: false },
+            ]
+        });      
+
+        isc.TabSet.create({
+            ID: "F04003_TaskMaster_TabSet",
+            tabBarPosition: "top",
+            width: "100%",
+            height: "40%",
+            tabs: [
+                { title: "List SQL", canClose: false, pane: F04003_TaskConfig_ListSQL },
+                { title: "Master SQL", canClose: false, pane: F04003_TaskConfig_MasterSQL },
+                { title: "Master Prop SQL", canClose: false, pane: F04003_TaskConfig_Prop1SQL },
+                { title: "Detail SQL", canClose: false, pane: F04003_TaskConfig_DetailSQL },
+                { title: "Detail Prop SQL", canClose: false, pane: F04003_TaskConfig_Prop2SQL },
+                { title: "Success SQL", canClose: false, pane: F04003_TaskConfig_SuccessSQL },
+            ]
+        });
+
+        isc.IButton.create({
+            ID: "F04003_TaskMasterEditForm_btSave",
+            height: 30,
+            margin: 2,
+            title: "res.btn_save",
+            //icon: Common.iconPath.save,
+            click: function () {
+                if (F04003_TaskMasterEditForm.validate() == false) return;
+
+                let form = new TaskMasterForm();
+                form.SaveTaskMaster();
+
+                TaskMasterEditWindow.destroy();
+            }
+        });
+
+        isc.IButton.create({
+            ID: "F04003_TaskMasterEditForm_btClose",
+            height: 30,
+            margin: 2,
+            title:"res.btn_close",
+            //icon: Common.iconPath.close,
+            click: function () {
+                TaskMasterEditWindow.destroy();
+            }
+        });
+
+        isc.HLayout.create(
+            {
+                ID: "F04003_TaskMasterEditForm_ButLayoutH",
+                width: "100%",//F04003_EditForm.width,
+                height: 40,
+                padding: 4,
+                align: "center",
+                backgroundColor: "#F0F8FF",
+                members: [F04003_TaskMasterEditForm_btSave, F04003_TaskMasterEditForm_btClose]
+            });
+
+        isc.VLayout.create({
+            ID: "F04003_FormsLayout",
+            width: "100%",
+            height: "100%",
+            padding: 10,
+            //backgroundColor: Common.Color.formBackground,
+            members: [F04003_TaskMasterEditForm, F04003_TaskMaster_TabSet]
+        });
+
+        this.EditWindow = isc.Window.create({
+            ID: "TaskMasterEditWindow",
+            title: "res.taskMaster_formtitle",
+            //backgroundColor: Common.Color.formBackground,
+            //autoSize: true,
+            width: 850,
+            height: 540,
+            autoCenter: true,
+            canDragReposition: true,
+            canDragResize: true,
+            isModal: true,
+            showModalMask: true,
+            showMaximizeButton:true,
+            modalMaskOpacity: 45,
+            //parentElement: Form_F04003,
+            items: [F04003_FormsLayout , F04003_TaskMasterEditForm_ButLayoutH]
+        });    
+
+}
+
+</script>
+
+</body>
+</html>
